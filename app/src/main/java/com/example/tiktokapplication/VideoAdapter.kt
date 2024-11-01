@@ -36,7 +36,7 @@ data class WatchTimeRequest(
 
 // 创建一个 Retrofit 实例
 object RetrofitClient {
-    private const val BASE_URL = "http://teledesktop.amtlld.top:24763/"
+    private const val BASE_URL = "http://teledesktop.amtlld.top:38965/"
 
     private val okHttpClient: OkHttpClient by lazy {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
