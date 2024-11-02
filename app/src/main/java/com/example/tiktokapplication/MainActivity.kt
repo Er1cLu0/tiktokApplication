@@ -17,6 +17,7 @@ import java.util.Locale
 import android.content.Context
 import android.net.wifi.WifiManager
 import android.os.Build
+import retrofit2.Call
 import java.net.NetworkInterface
 
 fun getMacAddress(context: Context): String {
@@ -90,13 +91,17 @@ class MainActivity : AppCompatActivity() {
         // 如果当前有视频正在播放，计算观看时间并上传记录
         currentVideoId?.let { previousVideoId ->
             val watchDuration = (SystemClock.elapsedRealtime() - startTime) / 1000 // 秒
-            val watchTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(System.currentTimeMillis())
+            val watchTime = SimpleDateFormat(
+                "yyyy-MM-dd'T'HH:mm:ss",
+                Locale.getDefault()
+            ).format(System.currentTimeMillis())
             val record = WatchRecord(
                 macAddress = macAddress,
                 videoId = previousVideoId,
                 watchDuration = watchDuration.toInt(),
                 watchTime = watchTime
             )
+
             uploadWatchRecord(record)
         }
 
@@ -106,24 +111,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun uploadWatchRecord(record: WatchRecord) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response = apiService.uploadWatchRecord(record)
+        val call = apiService.addWatchRecord(record)
+        call.enqueue(object : retrofit2.Callback<Map<String, String>> {
+            override fun onResponse(
+                call: Call<Map<String, String>>,
+                response: retrofit2.Response<Map<String, String>>
+            ) {
                 if (response.isSuccessful) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "观看记录上传成功", Toast.LENGTH_SHORT).show()
-                    }
+                    Toast.makeText(this@MainActivity, "观看记录上传成功", Toast.LENGTH_SHORT).show()
                 } else {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@MainActivity, "观看记录上传失败", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "上传时出错", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "观看记录上传失败", Toast.LENGTH_SHORT).show()
                 }
             }
-        }
+
+            override fun onFailure(call: Call<Map<String, String>>, t: Throwable) {
+                t.printStackTrace()
+                Toast.makeText(this@MainActivity, "上传时出错", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }
