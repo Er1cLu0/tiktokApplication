@@ -87,6 +87,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun uploadWatchRecord(record: WatchRecord) {
+        val call = apiService.addWatchRecord(record)
+        call.enqueue(object : retrofit2.Callback<Map<String, String>> {
+            override fun onResponse(
+                call: Call<Map<String, String>>,
+                response: retrofit2.Response<Map<String, String>>
+            ) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@MainActivity, "观看记录上传成功", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@MainActivity, "观看记录上传失败", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Map<String, String>>, t: Throwable) {
+                t.printStackTrace()
+                Toast.makeText(this@MainActivity, "上传时出错", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
     private fun onVideoChanged(newVideoId: Int) {
         // 如果当前有视频正在播放，计算观看时间并上传记录
         currentVideoId?.let { previousVideoId ->
@@ -110,24 +131,5 @@ class MainActivity : AppCompatActivity() {
         startTime = SystemClock.elapsedRealtime()
     }
 
-    private fun uploadWatchRecord(record: WatchRecord) {
-        val call = apiService.addWatchRecord(record)
-        call.enqueue(object : retrofit2.Callback<Map<String, String>> {
-            override fun onResponse(
-                call: Call<Map<String, String>>,
-                response: retrofit2.Response<Map<String, String>>
-            ) {
-                if (response.isSuccessful) {
-                    Toast.makeText(this@MainActivity, "观看记录上传成功", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this@MainActivity, "观看记录上传失败", Toast.LENGTH_SHORT).show()
-                }
-            }
 
-            override fun onFailure(call: Call<Map<String, String>>, t: Throwable) {
-                t.printStackTrace()
-                Toast.makeText(this@MainActivity, "上传时出错", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
 }
