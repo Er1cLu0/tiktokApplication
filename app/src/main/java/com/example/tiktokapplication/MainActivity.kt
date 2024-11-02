@@ -8,8 +8,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jsoup.Jsoup
-import java.io.IOException
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,18 +47,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadVideoUrls() {
         CoroutineScope(Dispatchers.IO).launch {
+            val retrofit = Retrofit.Builder()
+                .baseUrl("http://teledesktop.amtlld.top:37568/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+            val apiService = retrofit.create(ApiService::class.java)
+
             try {
-                val doc = Jsoup.connect("http://teledesktop.amtlld.top:24763/videos/").get()
-                val elements = doc.select("a[href$=.mp4]")
-                val videoList = elements.map {
-                    Video("http://teledesktop.amtlld.top:24763/videos/${it.attr("href")}")
-                }
+                val videoList = apiService.getVideos()
                 withContext(Dispatchers.Main) {
                     videoAdapter.setVideos(videoList)
                 }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
+
 }

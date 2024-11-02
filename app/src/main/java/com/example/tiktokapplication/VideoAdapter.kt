@@ -8,8 +8,10 @@ import com.example.tiktokapplication.databinding.ItemVideoBinding
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 
-// 数据类表示视频的 URL
-data class Video(val videoUrl: String)
+data class Video(
+    val video_id: Int,
+    val video_url: String
+)
 
 class VideoAdapter : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
@@ -35,13 +37,15 @@ class VideoAdapter : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     // ViewHolder 类用于管理视频播放
     inner class VideoViewHolder(private val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root) {
-        internal var player: ExoPlayer? = null
+        var player: ExoPlayer? = null
 
         fun bind(video: Video) {
             // 初始化 ExoPlayer
-            player = ExoPlayer.Builder(binding.root.context).build()
-            binding.playerView.player = player
-            val mediaItem = MediaItem.fromUri(Uri.parse(video.videoUrl))
+            if (player == null) {
+                player = ExoPlayer.Builder(binding.root.context).build()
+                binding.playerView.player = player
+            }
+            val mediaItem = MediaItem.fromUri(Uri.parse(video.video_url)) // 使用 video.video_url
             player?.setMediaItem(mediaItem)
             player?.prepare()
             player?.playWhenReady = true
