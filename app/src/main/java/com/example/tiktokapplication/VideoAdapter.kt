@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.tiktokapplication.databinding.ItemVideoBinding
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-
+import android.util.Log
 data class Video(
     val video_id: Int,
     val video_url: String
@@ -17,7 +17,7 @@ class VideoAdapter(
     private val onVideoClick: (Video) -> Unit
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
-    private val videos = mutableListOf<Video>()
+    internal val videos = mutableListOf<Video>()
 
     // 更新视频列表
     fun setVideos(videos: List<Video>) {
@@ -32,6 +32,9 @@ class VideoAdapter(
     }
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
+
+        Log.d("VideoAdapter", "Binding video at position: $position")
+
         holder.bind(videos[position], onVideoClick)
     }
 
@@ -50,12 +53,14 @@ class VideoAdapter(
             val mediaItem = MediaItem.fromUri(Uri.parse(video.video_url))
             player?.setMediaItem(mediaItem)
             player?.prepare()
-            player?.playWhenReady = true
+            player?.playWhenReady = false
 
             // 点击视频时触发
             binding.root.setOnClickListener {
+                Log.d("VideoAdapter", "Video clicked: ${video.video_id}")
                 onVideoClick(video)
             }
+            binding.root.isClickable = true
         }
 
         // 释放播放器资源
